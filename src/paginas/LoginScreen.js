@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: 'black',
     fontWeight: 'bold',
   },
   forgotPasswordContainer: {

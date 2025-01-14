@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 export default function RegisterScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [nick, setNick] = useState('');
   const [name, setName] = useState('');
   const [firstSurname, setFirstSurname] = useState('');
@@ -9,34 +12,64 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Image source={require('../../assets/formulario 1.png')} style={styles.image} />
       <Text style={styles.title}>Completar los siguientes campos:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Introduzca su nick"
-        value={nick}
-        onChangeText={setNick}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Introduzca su nombre"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Introduzca su primer apellido"
-        value={firstSurname}
-        onChangeText={setFirstSurname}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Introduzca su segundo apellido"
-        value={secondSurname}
-        onChangeText={setSecondSurname}
-      />
-      <TouchableOpacity style={styles.button} onPress={() => console.log('Register')}>
-        <Text style={styles.buttonText}>Finalizar</Text>
-      </TouchableOpacity>
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca su correo"
+          placeholderTextColor="#b3b3b3"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca contraseña"
+          placeholderTextColor="#b3b3b3"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Repita contraseña"
+          placeholderTextColor="#b3b3b3"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca su nick"
+          placeholderTextColor="#b3b3b3"
+          value={nick}
+          onChangeText={setNick}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca su nombre"
+          placeholderTextColor="#b3b3b3"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca su primer apellido"
+          placeholderTextColor="#b3b3b3"
+          value={firstSurname}
+          onChangeText={setFirstSurname}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca su segundo apellido"
+          placeholderTextColor="#b3b3b3"
+          value={secondSurname}
+          onChangeText={setSecondSurname}
+        />
+        <TouchableOpacity style={styles.button} onPress={() => console.log('Register')}>
+          <Text style={styles.buttonText}>FINALIZAR</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -44,33 +77,50 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#121212',
     padding: 20,
+    alignItems: 'center',
+  },
+  image: {
+    height: 280,
+    resizeMode: 'contain',
+    marginBottom: 20,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#84bd00',
+    textAlign: 'left', // Alinea el texto a la derecha
+    width: '90%',
     marginBottom: 20,
   },
-  input: {
+  formContainer: {
     width: '100%',
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-  button: {
-    width: '100%',
-    padding: 15,
-    backgroundColor: '#84bd00',
-    borderRadius: 5,
+    marginTop: 40, // Desplaza los formularios y el botón hacia abajo
     alignItems: 'center',
   },
+  input: {
+    width: '90%',
+    padding: 3,
+    marginBottom: 15,
+    color: '#868686',
+    borderBottomWidth: 1,
+    borderBottomColor: '#868686', // Color de la línea separadora
+    fontSize: 14,
+  },
+  button: {
+    width: '50%',
+    padding: 15,
+    backgroundColor: '#121212', // Fondo del botón
+    borderRadius: 8, // Esquinas redondeadas
+    alignItems: 'center',
+    marginTop: 30, // Ajusta la distancia entre el formulario y el botón
+    borderWidth: 3, // Grosor del borde
+    borderColor: '#84bd00', // Color del borde
+  },
   buttonText: {
-    color: '#fff',
+    color: 'white',
     fontWeight: 'bold',
+    fontSize: 16,
   },
 });
