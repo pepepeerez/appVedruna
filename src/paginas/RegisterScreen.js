@@ -3,21 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView,
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { app } from '../../firebase-config';
 
-
 export function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [nick, setNick] = useState('');
-  const [name, setName] = useState('');
-  const [firstSurname, setFirstSurname] = useState('');
-  const [secondSurname, setSecondSurname] = useState('');
   const auth = getAuth(app);
 
   const handleCreateAccount = () => {
-    console.log('Password:', password);
-    console.log('Confirm Password:', confirmPassword);
-
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Las contraseñas no coinciden.');
       return;
@@ -41,56 +33,32 @@ export function RegisterScreen({ navigation }) {
         <Text style={styles.title}>Completar los siguientes campos:</Text>
         <View style={styles.formContainer}>
           <TextInput
+            onChangeText={(text) => setEmail(text)}
             style={styles.input}
             placeholder="Introduzca su correo"
-            placeholderTextColor="#b3b3b3"
-            value={email}
-            onChangeText={{setEmail}}
+            placeholderTextColor="#ccc"
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
           <TextInput
+            onChangeText={(text) => setPassword(text)}
             style={styles.input}
-            placeholder="Introduzca contraseña"
-            placeholderTextColor="#b3b3b3"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
+            placeholder="Introduzca su contraseña"
+            placeholderTextColor="#ccc"
+            secureTextEntry={true}
           />
           <TextInput
+            onChangeText={(text) => setConfirmPassword(text)}
             style={styles.input}
-            placeholder="Repita contraseña"
-            placeholderTextColor="#b3b3b3"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            placeholder="Repita su contraseña"
+            placeholderTextColor="#ccc"
+            secureTextEntry={true}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Introduzca su nick"
-            placeholderTextColor="#b3b3b3"
-            value={nick}
-            onChangeText={setNick}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Introduzca su nombre"
-            placeholderTextColor="#b3b3b3"
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Introduzca su primer apellido"
-            placeholderTextColor="#b3b3b3"
-            value={firstSurname}
-            onChangeText={setFirstSurname}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Introduzca su segundo apellido"
-            placeholderTextColor="#b3b3b3"
-            value={secondSurname}
-            onChangeText={setSecondSurname}
-          />
+          <TextInput style={styles.input} placeholder="Introduzca su nick" placeholderTextColor="#ccc" />
+          <TextInput style={styles.input} placeholder="Introduzca su nombre" placeholderTextColor="#ccc" />
+          <TextInput style={styles.input} placeholder="Introduzca su primer apellido" placeholderTextColor="#ccc" />
+          <TextInput style={styles.input} placeholder="Introduzca su segundo apellido" placeholderTextColor="#ccc" />
+
           <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
             <Text style={styles.buttonText}>FINALIZAR</Text>
           </TouchableOpacity>

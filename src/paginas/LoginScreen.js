@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from '../../firebase-config';
 
-
 export function LoginScreen({ navigation }) {
-  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const auth = getAuth(app);
-  
-  const handleSingIn = () => {
+
+  const handleSignIn = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         console.log('Sesión iniciada');
@@ -18,9 +16,9 @@ export function LoginScreen({ navigation }) {
       })
       .catch((error) => {
         console.log('Error al iniciar sesión:', error);
+        Alert.alert('Error', 'No se pudo iniciar sesión. Verifica tus datos.');
       });
   };
-
 
   return (
     <View style={styles.container}>
@@ -34,7 +32,7 @@ export function LoginScreen({ navigation }) {
         placeholder="Introduzca su correo o nick..."
         placeholderTextColor="#666"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text)}
       />
       <TextInput
         style={[styles.input, styles.passwordInput]} // Aplica un estilo adicional al campo de contraseña
@@ -42,7 +40,7 @@ export function LoginScreen({ navigation }) {
         placeholderTextColor="#666"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => setPassword(text)}
       />
 
       {/* Enlace de "¿Olvidaste tu contraseña?" */}
@@ -50,7 +48,7 @@ export function LoginScreen({ navigation }) {
         <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleSingIn}>
+      <TouchableOpacity style={styles.button} onPress={handleSignIn}>
         <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
 
