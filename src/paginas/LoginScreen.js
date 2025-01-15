@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from '../../firebase-config';
+
 
 export function LoginScreen({ navigation }) {
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const auth = getAuth(app);
+  
+  const handleSingIn = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log('Sesión iniciada');
+        navigation.navigate('TabNavegation');
+      })
+      .catch((error) => {
+        console.log('Error al iniciar sesión:', error);
+      });
+  };
+
 
   return (
     <View style={styles.container}>
@@ -33,7 +50,7 @@ export function LoginScreen({ navigation }) {
         <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TabNavegation')}>
+      <TouchableOpacity style={styles.button} onPress={handleSingIn}>
         <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
 

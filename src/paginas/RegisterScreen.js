@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { app } from '../../firebase-config';
+
 
 export function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -9,6 +12,27 @@ export function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
   const [firstSurname, setFirstSurname] = useState('');
   const [secondSurname, setSecondSurname] = useState('');
+  const auth = getAuth(app);
+
+  const handleCreateAccount = () => {
+    console.log('Password:', password);
+    console.log('Confirm Password:', confirmPassword);
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log('Cuenta creada');
+        navigation.navigate('LoginScreen');
+      })
+      .catch((error) => {
+        console.log('Error al crear cuenta:', error);
+        Alert.alert('Error', 'No se pudo crear la cuenta. Verifica los datos.');
+      });
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -21,7 +45,7 @@ export function RegisterScreen({ navigation }) {
             placeholder="Introduzca su correo"
             placeholderTextColor="#b3b3b3"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={{setEmail}}
           />
           <TextInput
             style={styles.input}
@@ -67,7 +91,7 @@ export function RegisterScreen({ navigation }) {
             value={secondSurname}
             onChangeText={setSecondSurname}
           />
-          <TouchableOpacity style={styles.button} onPress={() => console.log('Register')}>
+          <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
             <Text style={styles.buttonText}>FINALIZAR</Text>
           </TouchableOpacity>
         </View>
