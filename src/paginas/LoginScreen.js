@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-export default function LoginScreen({ navigation }) {
+export function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,7 +33,7 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => console.log('Log In')}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TabNavegation')}>
         <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
 
