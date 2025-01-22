@@ -1,62 +1,101 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Alert, Image } from "react-native";
-import { launchCamera } from "react-native-image-picker";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Button, TextInput, Image, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
-export function AddScreen({ navigation }) {
-  const [photo, setPhoto] = useState(null);
+export function AddScreen() {
+  const [photo, setPhoto] = useState(null); // URI de la foto
+  const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
 
-  // Abrir la cámara automáticamente al cargar la pantalla
-  useEffect(() => {
-    openCamera();
-  }, []);
+  const openCamera = async () => {
+    // Solicitar permisos para la cámara
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
-  const openCamera = () => {
-    const options = {
-      mediaType: "photo",
-      cameraType: "back",
-      saveToPhotos: true,
-    };
+    if (status !== "granted") {
+      Alert.alert(
+        "Permiso denegado",
+        "Se necesita permiso para acceder a la cámara. Por favor, habilítalo en la configuración."
+      );
+      return;
+    }
 
-    launchCamera(options, (response) => {
-      if (response.didCancel) {
-        console.log("El usuario canceló la cámara");
-        navigation.goBack(); // Volver atrás si el usuario cancela
-      } else if (response.errorCode) {
-        console.error("Error al abrir la cámara:", response.errorMessage);
-        Alert.alert("Error", "No se pudo acceder a la cámara.");
-        navigation.goBack();
-      } else {
-        console.log("Foto capturada:", response.assets);
-        if (response.assets && response.assets.length > 0) {
-          setPhoto(response.assets[0]); // Guardamos la foto tomada
-        }
-      }
+    // Abrir la cámara
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
+
+    if (!result.canceled) {
+      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+    }
+  };
+
+  const handleSave = () => {
+    if (!photo) {
+      Alert.alert("Error", "Por favor, toma una foto primero.");
+      return;
+    }
+
+    if (!title.trim() || !comment.trim()) {
+      Alert.alert("Error", "Por favor, ingresa un título y un comentario.");
+      return;
+    }
+
+    // Aquí puedes añadir la lógica para guardar la foto, título y comentario en tu base de datos
+    Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
+    setPhoto(null);
+    setTitle("");
+    setComment("");
   };
 
   return (
     <View style={styles.container}>
+      {photo && <Image source={{ uri: photo }} style={styles.photo} />}
+      <Button title="Abrir Cámara" onPress={openCamera} />
       {photo && (
-        <Image
-          source={{ uri: photo.uri }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Título"
+            value={title}
+            onChangeText={setTitle}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Comentario"
+            value={comment}
+            onChangeText={setComment}
+          />
+          <Button title="Guardar" onPress={handleSave} />
+        </>
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#121212",
+    padding: 20,
   },
-  image: {
-    width: 300,
-    height: 400,
-    marginTop: 20,
+  photo: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 10,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
   },
 });
+
+export default AddScreen;
