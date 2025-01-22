@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Button, TextInput, Image, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 export function AddScreen() {
   const [photo, setPhoto] = useState(null); // URI de la foto
   const [title, setTitle] = useState("");
-  const [comment, setComment] = useState("");
+  const [description, setDescription] = useState("");
 
   const openCamera = async () => {
     // Solicitar permisos para la cámara
@@ -38,42 +38,54 @@ export function AddScreen() {
       return;
     }
 
-    if (!title.trim() || !comment.trim()) {
-      Alert.alert("Error", "Por favor, ingresa un título y un comentario.");
+    if (!title.trim() || !description.trim()) {
+      Alert.alert("Error", "Por favor, ingresa un título y una descripción.");
       return;
     }
 
-    // Aquí puedes añadir la lógica para guardar la foto, título y comentario en tu base de datos
+    // Aquí puedes añadir la lógica para guardar la foto, título y descripción en tu base de datos
     Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
     setPhoto(null);
     setTitle("");
-    setComment("");
+    setDescription("");
   };
 
   return (
     <View style={styles.container}>
-      {photo && <Image source={{ uri: photo }} style={styles.photo} />}
-      <Button title="Abrir Cámara" onPress={openCamera} />
-      {photo && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Título"
-            value={title}
-            onChangeText={setTitle}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Comentario"
-            value={comment}
-            onChangeText={setComment}
-          />
-          <Button title="Guardar" onPress={handleSave} />
-        </>
-      )}
+      <Text style={styles.title}>Publicación</Text>
+      <TouchableOpacity style={styles.photoContainer} onPress={openCamera}>
+        {photo ? (
+          <Image source={{ uri: photo }} style={styles.photo} />
+        ) : (
+          <Image source={require('../../assets/Contacts.png')} style={styles.logo} />
+        )}
+      </TouchableOpacity>
+      <View style={styles.inputContainer}>
+        <Text style={styles.tituloInput}>Título:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Máx. 40 caracteres"
+          maxLength={40}
+          value={title}
+          onChangeText={setTitle}
+        />
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.tituloInput}>Descripción:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Máx. 250 caracteres"
+          maxLength={250}
+          value={description}
+          onChangeText={setDescription}
+        />
+      </View>
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
+        <Text style={styles.buttonText}>Publicar</Text>
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -81,20 +93,63 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#121212",
   },
-  photo: {
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#9FC63B",
+    marginBottom: 20,
+  },
+  photoContainer: {
     width: 200,
     height: 200,
-    marginBottom: 20,
+    backgroundColor: "#f0f0f0",
     borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  photo: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+  },
+  inputContainer: {
+    width: "100%",
+    marginVertical: 10,
+  },
+  tituloInput: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#9FC63B",
   },
   input: {
     width: "100%",
     padding: 10,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    borderWidth: 0,
     borderRadius: 5,
+    backgroundColor: "#868686",
+  },
+  button: {
+    width: '50%',
+    padding: 10,
+    backgroundColor: '#121212',
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 30,
+    borderWidth: 3,
+    borderColor: '#84bd00',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
   },
 });
 
