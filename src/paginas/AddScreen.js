@@ -7,6 +7,30 @@ export function AddScreen() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const openImagePicker = async () => {
+    // Solicitar permisos para la galería
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permiso denegado",
+        "Se necesita permiso para acceder a la galería. Por favor, habilítalo en la configuración."
+      );
+      return;
+    }
+
+    // Abrir la galería
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+    }
+  };
+
   const openCamera = async () => {
     // Solicitar permisos para la cámara
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -34,7 +58,7 @@ export function AddScreen() {
 
   const handleSave = () => {
     if (!photo) {
-      Alert.alert("Error", "Por favor, toma una foto primero.");
+      Alert.alert("Error", "Por favor, toma una foto o selecciona una de la galería primero.");
       return;
     }
 
@@ -53,7 +77,17 @@ export function AddScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Publicación</Text>
-      <TouchableOpacity style={styles.photoContainer} onPress={openCamera}>
+      <TouchableOpacity style={[styles.photoContainer, { borderColor: '#84bd00', borderWidth: 3 }]} onPress={() => {
+        Alert.alert(
+          "Seleccionar opción",
+          "¿Quieres tomar una foto o seleccionar una de la galería?",
+          [
+            { text: "Tomar foto", onPress: openCamera },
+            { text: "Seleccionar de la galería", onPress: openImagePicker },
+            { text: "Cancelar", style: "cancel" }
+          ]
+        );
+      }}>
         {photo ? (
           <Image source={{ uri: photo }} style={styles.photo} />
         ) : (
@@ -73,7 +107,7 @@ export function AddScreen() {
       <View style={styles.inputContainer}>
         <Text style={styles.tituloInput}>Descripción:</Text>
         <TextInput
-          style={styles.input}
+          style={styles.descriptionInput}
           placeholder="Máx. 250 caracteres"
           maxLength={250}
           value={description}
@@ -81,7 +115,7 @@ export function AddScreen() {
         />
       </View>
       <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Publicar</Text>
+        <Text style={styles.buttonText}>PUBLICAR</Text>
       </TouchableOpacity>
     </View>
   );
@@ -96,16 +130,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#121212",
   },
   title: {
-    fontSize: 26,
+    fontSize: 39,
     fontWeight: "bold",
     color: "#9FC63B",
-    marginBottom: 20,
+    marginBottom: 15,
+    marginTop: 30,
   },
   photoContainer: {
     width: 200,
     height: 200,
     backgroundColor: "#f0f0f0",
-    borderRadius: 10,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
@@ -124,17 +159,29 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   tituloInput: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,
     color: "#9FC63B",
+    marginBottom: 15,
   },
   input: {
     width: "100%",
     padding: 10,
     borderWidth: 0,
-    borderRadius: 5,
+    borderRadius: 10,
     backgroundColor: "#868686",
+    fontSize: 15,
+  },
+  descriptionInput: {
+    width: "100%",
+    height: 180,
+    padding: 10,
+    borderWidth: 0,
+    borderRadius: 10,
+    backgroundColor: "#868686",
+    textAlignVertical: "top",
+    fontSize: 15,
   },
   button: {
     width: '50%',
@@ -142,7 +189,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 25,
     borderWidth: 3,
     borderColor: '#84bd00',
   },
