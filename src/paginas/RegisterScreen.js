@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { app } from '../../firebase-config';
+import axios from 'axios'; // Asegúrate de tener instalado y configurado axios
 
 export function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [nick, setNick] = useState('');
+  const [name, setName] = useState('');
+  const [lastName1, setLastName1] = useState('');
+  const [lastName2, setLastName2] = useState('');
   const auth = getAuth(app);
 
   const handleCreateAccount = () => {
@@ -18,12 +23,28 @@ export function RegisterScreen({ navigation }) {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         console.log('Cuenta creada');
+        saveUserDataToMicroservice();
         navigation.navigate('LoginScreen');
       })
       .catch((error) => {
         console.log('Error al crear cuenta:', error);
         Alert.alert('Error', 'No se pudo crear la cuenta. Verifica los datos.');
       });
+  };
+
+  const saveUserDataToMicroservice = async () => {
+    try {
+      await axios.post('http://localhost:8080/proyecto01/users', {
+        nick,
+        name,
+        lastName1,
+        lastName2,
+      });
+      console.log('Datos guardados en el microservicio');
+    } catch (error) {
+      console.error('Error al guardar los datos en el microservicio:', error);
+      Alert.alert('Error', 'No se pudieron guardar los datos en el microservicio.');
+    }
   };
 
   return (
@@ -54,10 +75,30 @@ export function RegisterScreen({ navigation }) {
             placeholderTextColor="#ccc"
             secureTextEntry={true}
           />
-          <TextInput style={styles.input} placeholder="Introduzca su nick" placeholderTextColor="#ccc" />
-          <TextInput style={styles.input} placeholder="Introduzca su nombre" placeholderTextColor="#ccc" />
-          <TextInput style={styles.input} placeholder="Introduzca su primer apellido" placeholderTextColor="#ccc" />
-          <TextInput style={styles.input} placeholder="Introduzca su segundo apellido" placeholderTextColor="#ccc" />
+          <TextInput
+            onChangeText={(text) => setNick(text)}
+            style={styles.input}
+            placeholder="Introduzca su nick"
+            placeholderTextColor="#ccc"
+          />
+          <TextInput
+            onChangeText={(text) => setName(text)}
+            style={styles.input}
+            placeholder="Introduzca su nombre"
+            placeholderTextColor="#ccc"
+          />
+          <TextInput
+            onChangeText={(text) => setLastName1(text)}
+            style={styles.input}
+            placeholder="Introduzca su primer apellido"
+            placeholderTextColor="#ccc"
+          />
+          <TextInput
+            onChangeText={(text) => setLastName2(text)}
+            style={styles.input}
+            placeholder="Introduzca su segundo apellido"
+            placeholderTextColor="#ccc"
+          />
 
           <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
             <Text style={styles.buttonText}>FINALIZAR</Text>
