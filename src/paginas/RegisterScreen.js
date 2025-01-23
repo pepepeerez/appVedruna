@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { app } from '../../firebase-config';
-import axios from 'axios'; // Asegúrate de tener instalado y configurado axios
 
 export function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -30,21 +29,6 @@ export function RegisterScreen({ navigation }) {
         console.log('Error al crear cuenta:', error);
         Alert.alert('Error', 'No se pudo crear la cuenta. Verifica los datos.');
       });
-  };
-
-  const saveUserDataToMicroservice = async () => {
-    try {
-      await axios.post('http://localhost:8080/proyecto01/users', {
-        nick,
-        name,
-        lastName1,
-        lastName2,
-      });
-      console.log('Datos guardados en el microservicio');
-    } catch (error) {
-      console.error('Error al guardar los datos en el microservicio:', error);
-      Alert.alert('Error', 'No se pudieron guardar los datos en el microservicio.');
-    }
   };
 
   return (
