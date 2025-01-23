@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 export function AddScreen() {
@@ -8,7 +8,6 @@ export function AddScreen() {
   const [description, setDescription] = useState("");
 
   const openImagePicker = async () => {
-    // Solicitar permisos para la galería
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
@@ -19,7 +18,6 @@ export function AddScreen() {
       return;
     }
 
-    // Abrir la galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -27,12 +25,11 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+      setPhoto(result.assets[0].uri);
     }
   };
 
   const openCamera = async () => {
-    // Solicitar permisos para la cámara
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
     if (status !== "granted") {
@@ -43,7 +40,6 @@ export function AddScreen() {
       return;
     }
 
-    // Abrir la cámara
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -52,7 +48,7 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+      setPhoto(result.assets[0].uri);
     }
   };
 
@@ -67,7 +63,6 @@ export function AddScreen() {
       return;
     }
 
-    // Aquí puedes añadir la lógica para guardar la foto, título y descripción en tu base de datos
     Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
     setPhoto(null);
     setTitle("");
@@ -75,8 +70,8 @@ export function AddScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Publicación</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>PUBLICACIÓN</Text>
       <TouchableOpacity style={[styles.photoContainer, { borderColor: '#84bd00', borderWidth: 3 }]} onPress={() => {
         Alert.alert(
           "Seleccionar opción",
@@ -117,13 +112,13 @@ export function AddScreen() {
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>PUBLICAR</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -139,7 +134,7 @@ const styles = StyleSheet.create({
   photoContainer: {
     width: 200,
     height: 200,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#121212", // Cambiar el color de fondo a #121212
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
