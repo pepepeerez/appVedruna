@@ -7,6 +7,9 @@ export function AddScreen() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const cloudName = "dnlggc5sw"; // Reemplaza con tu Cloud Name
+  const uploadPreset = "appVedruna"; // Reemplaza con tu Upload Preset configurado en Cloudinary
+
   const openImagePicker = async () => {
     // Solicitar permisos para la galería
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -56,7 +59,35 @@ export function AddScreen() {
     }
   };
 
-  const handleSave = () => {
+  const uploadToCloudinary = async (imageUri) => {
+    const data = new FormData();
+    data.append("file", {
+      uri: imageUri,
+      type: "image/jpeg", // Ajusta según el formato de imagen
+      name: "upload.jpg",
+    });
+    data.append("upload_preset", uploadPreset);
+
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await response.json();
+      if (result.secure_url) {
+        return result.secure_url; // URL de la imagen subida
+      } else {
+        console.error("Error en la subida:", result);
+        throw new Error("No se pudo subir la imagen");
+      }
+    } catch (error) {
+      console.error("Error al subir la imagen:", error);
+      throw error;
+    }
+  };
+
+  const handleSave = async () => {
     if (!photo) {
       Alert.alert("Error", "Por favor, toma una foto o selecciona una de la galería primero.");
       return;
@@ -67,31 +98,41 @@ export function AddScreen() {
       return;
     }
 
-    // Aquí puedes añadir la lógica para guardar la foto, título y descripción en tu base de datos
-    Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
-    setPhoto(null);
-    setTitle("");
-    setDescription("");
+    try {
+      // Subir la imagen a Cloudinary
+      const imageUrl = await uploadToCloudinary(photo);
+
+      // Aquí puedes guardar `imageUrl`, `title` y `description` en tu base de datos
+      Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
+      setPhoto(null);
+      setTitle("");
+      setDescription("");
+    } catch (error) {
+      Alert.alert("Error", "No se pudo guardar la imagen. Intenta de nuevo.");
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Publicación</Text>
-      <TouchableOpacity style={[styles.photoContainer, { borderColor: '#84bd00', borderWidth: 3 }]} onPress={() => {
-        Alert.alert(
-          "Seleccionar opción",
-          "¿Quieres tomar una foto o seleccionar una de la galería?",
-          [
-            { text: "Tomar foto", onPress: openCamera },
-            { text: "Seleccionar de la galería", onPress: openImagePicker },
-            { text: "Cancelar", style: "cancel" }
-          ]
-        );
-      }}>
+      <TouchableOpacity
+        style={[styles.photoContainer, { borderColor: "#84bd00", borderWidth: 3 }]}
+        onPress={() => {
+          Alert.alert(
+            "Seleccionar opción",
+            "¿Quieres tomar una foto o seleccionar una de la galería?",
+            [
+              { text: "Tomar foto", onPress: openCamera },
+              { text: "Seleccionar de la galería", onPress: openImagePicker },
+              { text: "Cancelar", style: "cancel" },
+            ]
+          );
+        }}
+      >
         {photo ? (
           <Image source={{ uri: photo }} style={styles.photo} />
         ) : (
-          <Image source={require('../../assets/Contacts.png')} style={styles.logo} />
+          <Image source={require("../../assets/Contacts.png")} style={styles.logo} />
         )}
       </TouchableOpacity>
       <View style={styles.inputContainer}>
@@ -184,18 +225,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   button: {
-    width: '50%',
+    width: "50%",
     padding: 10,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 25,
     borderWidth: 3,
-    borderColor: '#84bd00',
+    borderColor: "#84bd00",
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 20,
   },
 });
