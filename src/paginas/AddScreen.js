@@ -2,27 +2,21 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
-export function AddScreen() {
-  const [photo, setPhoto] = useState(null); 
+export function AddScreen({ navigation }) {
+  const [photo, setPhoto] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const cloudName = "dnlggc5sw"; 
-  const uploadPreset = "appVedruna"; 
+  const cloudName = "dnlggc5sw";
+  const uploadPreset = "appVedruna";
 
   const openImagePicker = async () => {
-    // Solicitar permisos para la galería
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la galería. Por favor, habilítalo en la configuración."
-      );
+      Alert.alert("Permiso denegado", "Se necesita permiso para acceder a la galería.");
       return;
     }
 
-    // Abrir la galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -30,23 +24,17 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); 
+      setPhoto(result.assets[0].uri);
     }
   };
 
   const openCamera = async () => {
-    // Solicitar permisos para la cámara
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
     if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la cámara. Por favor, habilítalo en la configuración."
-      );
+      Alert.alert("Permiso denegado", "Se necesita permiso para acceder a la cámara.");
       return;
     }
 
-    // Abrir la cámara
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -55,7 +43,7 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); 
+      setPhoto(result.assets[0].uri);
     }
   };
 
@@ -63,7 +51,7 @@ export function AddScreen() {
     const data = new FormData();
     data.append("file", {
       uri: imageUri,
-      type: "image/jpeg", 
+      type: "image/jpeg",
       name: "upload.jpg",
     });
     data.append("upload_preset", uploadPreset);
@@ -76,7 +64,7 @@ export function AddScreen() {
 
       const result = await response.json();
       if (result.secure_url) {
-        return result.secure_url; 
+        return result.secure_url;
       } else {
         console.error("Error en la subida:", result);
         throw new Error("No se pudo subir la imagen");
@@ -88,11 +76,13 @@ export function AddScreen() {
   };
 
   const handleSave = async () => {
+    // Verificar que se haya seleccionado una imagen
     if (!photo) {
       Alert.alert("Error", "Por favor, toma una foto o selecciona una de la galería primero.");
       return;
     }
 
+    // Verificar que el título y la descripción no estén vacíos
     if (!title.trim() || !description.trim()) {
       Alert.alert("Error", "Por favor, ingresa un título y una descripción.");
       return;
@@ -102,11 +92,32 @@ export function AddScreen() {
       // Subir la imagen a Cloudinary
       const imageUrl = await uploadToCloudinary(photo);
 
-      
-      Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
-      setPhoto(null);
-      setTitle("");
-      setDescription("");
+      // Crear el objeto para la publicación sin incluir el user_id
+      const newPost = {
+        image_url: imageUrl,
+        titulo: title,
+        comentario: description,
+      };
+
+      // Llamar a la API para guardar la publicación
+      const response = await fetch("http://192.168.1.147:8080/proyecto01/publicaciones", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newPost),
+      });
+
+      const result = await response.json();
+
+      if (result.id) {
+        Alert.alert("Guardado", "Tu publicación ha sido guardada con éxito.");
+        setPhoto(null);
+        setTitle("");
+        setDescription("");
+      } else {
+        Alert.alert("Error", "No se pudo guardar la publicación. Intenta de nuevo.");
+      }
     } catch (error) {
       Alert.alert("Error", "No se pudo guardar la imagen. Intenta de nuevo.");
     }
