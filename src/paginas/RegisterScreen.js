@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { app } from '../../firebase-config';
+import axios from 'axios'; // Asegúrate de tener axios instalado
 
 export function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [nick, setNick] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [apellidos, setApellidos] = useState('');
   const auth = getAuth(app);
 
   const handleCreateAccount = () => {
@@ -16,9 +20,29 @@ export function RegisterScreen({ navigation }) {
     }
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         console.log('Cuenta creada');
-        navigation.navigate('LoginScreen');
+
+        // Obtener el UID del usuario creado
+        const userId = userCredential.user.uid;
+
+        // Crear el objeto del usuario
+        const usuarioData = {
+          user_id: userId,
+          nick: nick,
+          nombre: nombre,
+          apellidos: apellidos
+        };
+
+        // Enviar los datos a la API
+        try {
+          await axios.post('http://192.168.1.147:8080/proyecto01/users', usuarioData);
+          console.log('Usuario registrado en la API');
+          navigation.navigate('LoginScreen');
+        } catch (error) {
+          console.log('Error al registrar usuario en la API:', error);
+          Alert.alert('Error', 'No se pudo registrar el usuario en la API.');
+        }
       })
       .catch((error) => {
         console.log('Error al crear cuenta:', error);
@@ -54,10 +78,29 @@ export function RegisterScreen({ navigation }) {
             placeholderTextColor="#ccc"
             secureTextEntry={true}
           />
-          <TextInput style={styles.input} placeholder="Introduzca su nick" placeholderTextColor="#ccc" />
-          <TextInput style={styles.input} placeholder="Introduzca su nombre" placeholderTextColor="#ccc" />
-          <TextInput style={styles.input} placeholder="Introduzca su primer apellido" placeholderTextColor="#ccc" />
-          <TextInput style={styles.input} placeholder="Introduzca su segundo apellido" placeholderTextColor="#ccc" />
+          <TextInput
+            onChangeText={(text) => setNick(text)}
+            style={styles.input}
+            placeholder="Introduzca su nick"
+            placeholderTextColor="#ccc"
+          />
+          <TextInput
+            onChangeText={(text) => setNombre(text)}
+            style={styles.input}
+            placeholder="Introduzca su nombre"
+            placeholderTextColor="#ccc"
+          />
+          <TextInput
+            onChangeText={(text) => setApellidos(text)}
+            style={styles.input}
+            placeholder="Introduzca su primer apellido"
+            placeholderTextColor="#ccc"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Introduzca su segundo apellido"
+            placeholderTextColor="#ccc"
+          />
 
           <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
             <Text style={styles.buttonText}>FINALIZAR</Text>
