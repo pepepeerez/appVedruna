@@ -2,24 +2,21 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
-export function AddScreen() {
-  const [photo, setPhoto] = useState(null); // URI de la foto
+export function AddScreen({ navigation }) {
+  const [photo, setPhoto] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const openImagePicker = async () => {
-    // Solicitar permisos para la galería
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const cloudName = "dnlggc5sw";
+  const uploadPreset = "appVedruna";
 
+  const openImagePicker = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la galería. Por favor, habilítalo en la configuración."
-      );
+      Alert.alert("Permiso denegado", "Se necesita permiso para acceder a la galería.");
       return;
     }
 
-    // Abrir la galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -27,23 +24,17 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+      setPhoto(result.assets[0].uri);
     }
   };
 
   const openCamera = async () => {
-    // Solicitar permisos para la cámara
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
     if (status !== "granted") {
-      Alert.alert(
-        "Permiso denegado",
-        "Se necesita permiso para acceder a la cámara. Por favor, habilítalo en la configuración."
-      );
+      Alert.alert("Permiso denegado", "Se necesita permiso para acceder a la cámara.");
       return;
     }
 
-    // Abrir la cámara
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -52,46 +43,107 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+      setPhoto(result.assets[0].uri);
     }
   };
 
-  const handleSave = () => {
+  const uploadToCloudinary = async (imageUri) => {
+    const data = new FormData();
+    data.append("file", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "upload.jpg",
+    });
+    data.append("upload_preset", uploadPreset);
+
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await response.json();
+      if (result.secure_url) {
+        return result.secure_url;
+      } else {
+        console.error("Error en la subida:", result);
+        throw new Error("No se pudo subir la imagen");
+      }
+    } catch (error) {
+      console.error("Error al subir la imagen:", error);
+      throw error;
+    }
+  };
+
+  const handleSave = async () => {
+    // Verificar que se haya seleccionado una imagen
     if (!photo) {
       Alert.alert("Error", "Por favor, toma una foto o selecciona una de la galería primero.");
       return;
     }
 
+    // Verificar que el título y la descripción no estén vacíos
     if (!title.trim() || !description.trim()) {
       Alert.alert("Error", "Por favor, ingresa un título y una descripción.");
       return;
     }
 
-    // Aquí puedes añadir la lógica para guardar la foto, título y descripción en tu base de datos
-    Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
-    setPhoto(null);
-    setTitle("");
-    setDescription("");
+    try {
+      // Subir la imagen a Cloudinary
+      const imageUrl = await uploadToCloudinary(photo);
+
+      // Crear el objeto para la publicación sin incluir el user_id
+      const newPost = {
+        image_url: imageUrl,
+        titulo: title,
+        comentario: description,
+      };
+
+      // Llamar a la API para guardar la publicación
+      const response = await fetch("http://192.168.1.147:8080/proyecto01/publicaciones", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newPost),
+      });
+
+      const result = await response.json();
+
+      if (result.id) {
+        Alert.alert("Guardado", "Tu publicación ha sido guardada con éxito.");
+        setPhoto(null);
+        setTitle("");
+        setDescription("");
+      } else {
+        Alert.alert("Error", "No se pudo guardar la publicación. Intenta de nuevo.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "No se pudo guardar la imagen. Intenta de nuevo.");
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Publicación</Text>
-      <TouchableOpacity style={[styles.photoContainer, { borderColor: '#84bd00', borderWidth: 3 }]} onPress={() => {
-        Alert.alert(
-          "Seleccionar opción",
-          "¿Quieres tomar una foto o seleccionar una de la galería?",
-          [
-            { text: "Tomar foto", onPress: openCamera },
-            { text: "Seleccionar de la galería", onPress: openImagePicker },
-            { text: "Cancelar", style: "cancel" }
-          ]
-        );
-      }}>
+      <TouchableOpacity
+        style={[styles.photoContainer, { borderColor: "#84bd00", borderWidth: 3 }]}
+        onPress={() => {
+          Alert.alert(
+            "Seleccionar opción",
+            "¿Quieres tomar una foto o seleccionar una de la galería?",
+            [
+              { text: "Tomar foto", onPress: openCamera },
+              { text: "Seleccionar de la galería", onPress: openImagePicker },
+              { text: "Cancelar", style: "cancel" },
+            ]
+          );
+        }}
+      >
         {photo ? (
           <Image source={{ uri: photo }} style={styles.photo} />
         ) : (
-          <Image source={require('../../assets/Contacts.png')} style={styles.logo} />
+          <Image source={require("../../assets/Contacts.png")} style={styles.logo} />
         )}
       </TouchableOpacity>
       <View style={styles.inputContainer}>
@@ -184,18 +236,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   button: {
-    width: '50%',
+    width: "50%",
     padding: 10,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 25,
     borderWidth: 3,
-    borderColor: '#84bd00',
+    borderColor: "#84bd00",
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 20,
   },
 });

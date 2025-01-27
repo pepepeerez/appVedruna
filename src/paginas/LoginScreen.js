@@ -35,7 +35,7 @@ export function LoginScreen({ navigation }) {
         onChangeText={(text) => setEmail(text)}
       />
       <TextInput
-        style={[styles.input, styles.passwordInput]} // Aplica un estilo adicional al campo de contraseña
+        style={[styles.input, styles.passwordInput]} 
         placeholder="Introduzca su contraseña..."
         placeholderTextColor="#666"
         secureTextEntry

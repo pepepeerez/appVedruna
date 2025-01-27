@@ -28,10 +28,10 @@ export function TabNavegation() {
       />
       <Tab.Screen
         name="Add"
-        component={AddScreen}  // El nuevo componente de añadir publicaciones
+        component={AddScreen}  
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add" color={color} size={size} /> // Ícono para añadir
+            <Ionicons name="add" color={color} size={size} /> 
           ),
         }}
       />
