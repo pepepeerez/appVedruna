@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } fro
 import * as ImagePicker from "expo-image-picker";
 
 export function AddScreen() {
-  const [photo, setPhoto] = useState(null); // URI de la foto
+  const [photo, setPhoto] = useState(null); 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const cloudName = "dnlggc5sw"; // Reemplaza con tu Cloud Name
-  const uploadPreset = "appVedruna"; // Reemplaza con tu Upload Preset configurado en Cloudinary
+  const cloudName = "dnlggc5sw"; 
+  const uploadPreset = "appVedruna"; 
 
   const openImagePicker = async () => {
     // Solicitar permisos para la galería
@@ -30,7 +30,7 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+      setPhoto(result.assets[0].uri); 
     }
   };
 
@@ -55,7 +55,7 @@ export function AddScreen() {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri); // Guardar la URI de la foto
+      setPhoto(result.assets[0].uri); 
     }
   };
 
@@ -63,7 +63,7 @@ export function AddScreen() {
     const data = new FormData();
     data.append("file", {
       uri: imageUri,
-      type: "image/jpeg", // Ajusta según el formato de imagen
+      type: "image/jpeg", 
       name: "upload.jpg",
     });
     data.append("upload_preset", uploadPreset);
@@ -76,7 +76,7 @@ export function AddScreen() {
 
       const result = await response.json();
       if (result.secure_url) {
-        return result.secure_url; // URL de la imagen subida
+        return result.secure_url; 
       } else {
         console.error("Error en la subida:", result);
         throw new Error("No se pudo subir la imagen");
@@ -102,7 +102,7 @@ export function AddScreen() {
       // Subir la imagen a Cloudinary
       const imageUrl = await uploadToCloudinary(photo);
 
-      // Aquí puedes guardar `imageUrl`, `title` y `description` en tu base de datos
+      
       Alert.alert("Guardado", "Tu foto ha sido guardada con éxito.");
       setPhoto(null);
       setTitle("");
