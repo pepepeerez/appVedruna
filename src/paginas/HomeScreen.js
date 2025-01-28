@@ -1,30 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, Alert } from "react-native";
 
-// Componente para mostrar una publicación con su contenido y opciones de interacción
+// Componente principal de la pantalla de publicaciones
 export function HomeScreen() {
   const [posts, setPosts] = useState([]);
+  const [nick, setNick] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Obtener las publicaciones y sus detalles
+  // Obtener el nick y la foto de perfil del usuario desde el microservicio
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("http://192.168.1.147:8080/proyecto01/usuarios/1"); // Cambia "1" por el ID del usuario deseado
+        const user = await response.json();
+        setNick(user.nick); // Almacena el nick del usuario
+        setProfilePicture(user.profile_picture); // Almacena la foto de perfil del usuario
+      } catch (error) {
+        console.error("Error al obtener los datos del usuario:", error);
+        Alert.alert("Error", "No se pudo cargar el nombre del usuario.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Obtener las publicaciones
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const response = await fetch("http://192.168.1.147:8080/proyecto01/publicaciones");
         const result = await response.json();
-
-        // Aquí se asume que cada publicación tiene un user_id asociado que debemos buscar
-        const enrichedPosts = await Promise.all(result.map(async (post) => {
-          const userResponse = await fetch(`http://192.168.1.147:8080/proyecto01/usuarios/${post.id}`);
-          const user = await userResponse.json();
-          return {
-            ...post,
-            userNick: user.nick, // Agregar el nick del usuario a la publicación
-          };
-        }));
-
-        setPosts(enrichedPosts);
+        setPosts(result);
       } catch (error) {
         console.error("Error al obtener las publicaciones:", error);
         Alert.alert("Error", "No se pudo obtener las publicaciones.");
@@ -37,21 +45,18 @@ export function HomeScreen() {
   }, []);
 
   // Función para agregar un like
-  const handleLike = async (postId, id) => {
+  const handleLike = async (postId) => {
     try {
-      // Hacer un PUT a tu API para dar like
-      const response = await fetch(`http://192.168.1.147:8080/proyecto01/put/${postId}/${id}`, {
+      const response = await fetch(`http://192.168.1.147:8080/proyecto01/put/${postId}`, {
         method: "PUT",
       });
-  
+
       if (response.ok) {
         Alert.alert("Éxito", "Has dado like a la publicación.");
-        // Aquí, si quieres, puedes refrescar el estado de las publicaciones
-        // para reflejar la actualización del like.
         const updatedPost = await response.json();
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
-            post.id === postId ? { ...post, like: updatedPost.like } : post
+            post._id === postId ? { ...post, like: updatedPost.like } : post
           )
         );
       } else {
@@ -71,18 +76,17 @@ export function HomeScreen() {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.147:8080/proyecto01/publicaciones/${postId}/comentario`, {
+      const response = await fetch(`http://192.168.1.147:8080/proyecto01/comentarios/put`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ comentario: newComment }),
+        body: JSON.stringify({ id_publicacion: postId, comentario: newComment }),
       });
 
       if (response.ok) {
         Alert.alert("Éxito", "Comentario agregado.");
         setNewComment(""); // Limpiar el campo de comentario
-        // Recargar las publicaciones (si es necesario)
       } else {
         Alert.alert("Error", "No se pudo agregar el comentario.");
       }
@@ -92,20 +96,17 @@ export function HomeScreen() {
     }
   };
 
-  // Función para renderizar cada publicación
+  // Renderizar cada publicación
   const renderPost = ({ item }) => {
     return (
       <View style={styles.postContainer}>
-        <View style={styles.userInfo}>
-          <Text style={styles.userName}>{item.userName} {item.userSurname} ({item.userNick})</Text>
-        </View>
         <Image source={{ uri: item.image_url }} style={styles.postImage} />
-        <Text style={styles.postTitle}>{item.titulo}</Text>
-        <Text style={styles.postDescription}>{item.comentario}</Text>
+        <Text style={styles.postTitle}>{item.titulo || "Sin título"}</Text>
+        <Text style={styles.postDescription}>{item.comentario || "Sin descripción"}</Text>
 
         <View style={styles.likesContainer}>
-          <Text style={styles.likesText}>Likes: {item.like.length}</Text>
-          <TouchableOpacity style={styles.likeButton} onPress={() => handleLike(item.id)}>
+          <Text style={styles.likesText}>Likes: {item.like?.length || 0}</Text>
+          <TouchableOpacity style={styles.likeButton} onPress={() => handleLike(item._id)}>
             <Text style={styles.likeButtonText}>Dar like</Text>
           </TouchableOpacity>
         </View>
@@ -116,8 +117,9 @@ export function HomeScreen() {
             value={newComment}
             onChangeText={setNewComment}
             placeholder="Escribe un comentario..."
+            placeholderTextColor="#aaa"
           />
-          <TouchableOpacity style={styles.commentButton} onPress={() => handleComment(item.id)}>
+          <TouchableOpacity style={styles.commentButton} onPress={() => handleComment(item._id)}>
             <Text style={styles.commentButtonText}>Comentar</Text>
           </TouchableOpacity>
         </View>
@@ -126,16 +128,25 @@ export function HomeScreen() {
   };
 
   if (loading) {
-    return <Text>Cargando publicaciones...</Text>;
+    return <Text style={styles.loadingText}>Cargando publicaciones...</Text>;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Publicaciones</Text>
+      {/* Cabecera con nick y foto de perfil */}
+      <View style={styles.header}>
+        <Image
+          source={{ uri: profilePicture }}
+          style={styles.profilePicture}
+        />
+        <Text style={styles.nickText}>Nick: {nick || "Cargando..."}</Text>
+      </View>
+
+      {/* Lista de publicaciones */}
       <FlatList
-        data={posts}
+        data={posts || []}
         renderItem={renderPost}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id || Math.random().toString()}
       />
     </View>
   );
@@ -147,25 +158,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#121212",
     padding: 10,
   },
-  title: {
-    fontSize: 24,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E1E1E",
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 10,
+  },
+  profilePicture: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+  },
+  nickText: {
     color: "#9FC63B",
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
   },
   postContainer: {
     backgroundColor: "#1E1E1E",
     marginBottom: 20,
     padding: 15,
     borderRadius: 8,
-  },
-  userInfo: {
-    marginBottom: 10,
-  },
-  userName: {
-    color: "#9FC63B",
-    fontSize: 18,
-    fontWeight: "bold",
   },
   postImage: {
     width: "100%",
@@ -223,6 +239,12 @@ const styles = StyleSheet.create({
   commentButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  loadingText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 18,
+    marginTop: 20,
   },
 });
 
