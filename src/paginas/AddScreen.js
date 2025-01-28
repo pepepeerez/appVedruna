@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { auth } from '../../firebase-config'; // Asegúrate de importar tu módulo de autenticación
+
+const SERVER_URL = "http://192.168.1.147:8080/proyecto01/publicaciones"; // Cambia esto a tu URL del servidor
 
 export function AddScreen({ navigation }) {
   const [photo, setPhoto] = useState(null);
@@ -75,49 +78,60 @@ export function AddScreen({ navigation }) {
     }
   };
 
+  const savePost = async (imageUrl, titulo, comentario) => {
+    console.log('Entrando en savePost');
+    const userName = auth.currentUser?.displayName || 'Usuario Anónimo'; 
+    console.log('Usuario obtenido:', userName);
+    console.log('Datos a enviar:', { imageUrl, titulo, comentario });
+
+    try {
+      const response = await fetch(SERVER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: auth.currentUser?.uid,
+          image_url: imageUrl,
+          titulo,
+          comentario,
+          like: [],
+          user: userName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error en la respuesta del servidor:', errorText);
+        throw new Error(`Error del servidor: ${errorText}`);
+      }
+
+      console.log('Publicación guardada con éxito');
+    } catch (error) {
+      console.error('Error en savePost:', error);
+      Alert.alert('Error', 'No se pudo guardar la publicación');
+    }
+  };
+
   const handleSave = async () => {
-    // Verificar que se haya seleccionado una imagen
     if (!photo) {
       Alert.alert("Error", "Por favor, toma una foto o selecciona una de la galería primero.");
       return;
     }
 
-    // Verificar que el título y la descripción no estén vacíos
     if (!title.trim() || !description.trim()) {
       Alert.alert("Error", "Por favor, ingresa un título y una descripción.");
       return;
     }
 
     try {
-      // Subir la imagen a Cloudinary
       const imageUrl = await uploadToCloudinary(photo);
+      await savePost(imageUrl, title, description); // Llama a savePost aquí
 
-      // Crear el objeto para la publicación sin incluir el user_id
-      const newPost = {
-        image_url: imageUrl,
-        titulo: title,
-        comentario: description,
-      };
-
-      // Llamar a la API para guardar la publicación
-      const response = await fetch("http://192.168.1.147:8080/proyecto01/publicaciones", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newPost),
-      });
-
-      const result = await response.json();
-
-      if (result.id) {
-        Alert.alert("Guardado", "Tu publicación ha sido guardada con éxito.");
-        setPhoto(null);
-        setTitle("");
-        setDescription("");
-      } else {
-        Alert.alert("Error", "No se pudo guardar la publicación. Intenta de nuevo.");
-      }
+      Alert.alert("Guardado", "Tu publicación ha sido guardada con éxito.");
+      setPhoto(null);
+      setTitle("");
+      setDescription("");
     } catch (error) {
       Alert.alert("Error", "No se pudo guardar la imagen. Intenta de nuevo.");
     }
