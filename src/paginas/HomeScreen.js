@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { auth } from '../../firebase-config';
 
-// Función para calcular fecha 
 const timeAgo = (date) => {
   const now = new Date();
   const diff = now - new Date(date); 
@@ -29,6 +28,8 @@ export function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('');
   const [userLikes, setUserLikes] = useState(new Set());
+  const [userComments, setUserComments] = useState({});
+  const [newComment, setNewComment] = useState('');
   const userId = auth.currentUser?.uid; // Asegúrate de que userId se obtiene correctamente
 
   useEffect(() => {
@@ -94,6 +95,30 @@ export function HomeScreen() {
     }
   };
 
+  const handleComment = async (id) => {
+    try {
+      const url = `http://172.26.1.252:8080/proyecto01/comentarios/put`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: newComment }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al agregar el comentario');
+      }
+
+      const data = await response.json();
+      setUserComments((prev) => ({
+        ...prev,
+        [id]: [...(prev[id] || []), data.comment],
+      }));
+      setNewComment('');
+    } catch (error) {
+      console.error('Error al agregar el comentario:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -101,7 +126,7 @@ export function HomeScreen() {
         <View style={styles.userInfo}>
           <View style={styles.userDetails}>
             <Image
-              source={require('../../assets/perfil.jpg')}  
+              source={require('../../assets/perfil.jpg')}
               style={styles.userPhoto}
             />
             <View>
@@ -142,6 +167,26 @@ export function HomeScreen() {
                   <Text style={styles.title}>{publicacion.titulo}</Text>
                   <Text style={styles.description}>{publicacion.comentario}</Text>
                   <Text style={styles.date}>{timeAgo(publicacion.createdAt)}</Text>
+                  <View style={styles.commentContainer}>
+                    <TextInput
+                      style={styles.commentInput}
+                      placeholder="Escribe un comentario..."
+                      value={newComment}
+                      onChangeText={setNewComment}
+                    />
+                    <TouchableOpacity onPress={() => handleComment(publicacion.id)}>
+                      <Icon name="send" size={20} color="#9FC63B" />
+                    </TouchableOpacity>
+                  </View>
+                  {userComments[publicacion.id] && (
+                    <View style={styles.commentsList}>
+                      {userComments[publicacion.id].map((comment, index) => (
+                        <Text key={index} style={styles.comment}>
+                          {comment}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
                 </View>
               );
             })
@@ -243,5 +288,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     marginTop: 20,
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  commentInput: {
+    flex: 1,
+    backgroundColor: '#333',
+    color: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 10,
+  },
+  commentsList: {
+    marginTop: 10,
+  },
+  comment: {
+    color: '#cccccc',
+    fontSize: 14,
+    marginBottom: 5,
   },
 });
