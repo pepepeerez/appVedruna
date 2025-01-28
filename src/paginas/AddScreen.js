@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { auth } from '../../firebase-config'; // Asegúrate de importar tu módulo de autenticación
 
-const SERVER_URL = "http://192.168.1.147:8080/proyecto01/publicaciones"; // Cambia esto a tu URL del servidor
+const SERVER_URL = "http://172.26.1.252:8080/proyecto01/publicaciones"; // Cambia esto a tu URL del servidor
 
 export function AddScreen({ navigation }) {
   const [photo, setPhoto] = useState(null);
@@ -22,8 +22,7 @@ export function AddScreen({ navigation }) {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
+      quality: 1, // Eliminar allowsEditing
     });
 
     if (!result.canceled) {
@@ -40,9 +39,8 @@ export function AddScreen({ navigation }) {
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 1, // Eliminar allowsEditing
     });
 
     if (!result.canceled) {
@@ -79,10 +77,7 @@ export function AddScreen({ navigation }) {
   };
 
   const savePost = async (imageUrl, titulo, comentario) => {
-    console.log('Entrando en savePost');
     const userName = auth.currentUser?.displayName || 'Usuario Anónimo'; 
-    console.log('Usuario obtenido:', userName);
-    console.log('Datos a enviar:', { imageUrl, titulo, comentario });
 
     try {
       const response = await fetch(SERVER_URL, {
@@ -102,11 +97,10 @@ export function AddScreen({ navigation }) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error en la respuesta del servidor:', errorText);
         throw new Error(`Error del servidor: ${errorText}`);
       }
 
-      console.log('Publicación guardada con éxito');
+      Alert.alert("Guardado", "Tu publicación ha sido guardada con éxito.");
     } catch (error) {
       console.error('Error en savePost:', error);
       Alert.alert('Error', 'No se pudo guardar la publicación');
@@ -126,9 +120,9 @@ export function AddScreen({ navigation }) {
 
     try {
       const imageUrl = await uploadToCloudinary(photo);
-      await savePost(imageUrl, title, description); // Llama a savePost aquí
+      await savePost(imageUrl, title, description);
 
-      Alert.alert("Guardado", "Tu publicación ha sido guardada con éxito.");
+      // Reiniciar campos
       setPhoto(null);
       setTitle("");
       setDescription("");
@@ -138,7 +132,9 @@ export function AddScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      contentContainerStyle={styles.scrollContainer} // Usar contentContainerStyle aquí
+    >
       <Text style={styles.title}>Publicación</Text>
       <TouchableOpacity
         style={[styles.photoContainer, { borderColor: "#84bd00", borderWidth: 3 }]}
@@ -183,13 +179,13 @@ export function AddScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>PUBLICAR</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1, // Asegúrate de que el contenedor interno crezca
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -229,7 +225,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
     color: "#9FC63B",
-    marginBottom: 15,
   },
   input: {
     width: "100%",

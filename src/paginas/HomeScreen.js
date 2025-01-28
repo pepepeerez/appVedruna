@@ -13,7 +13,7 @@ export function HomeScreen() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://192.168.1.147:8080/proyecto01/usuarios/1"); // Cambia "1" por el ID del usuario deseado
+        const response = await fetch("http://172.26.1.252:8080/proyecto01/usuarios/1"); // Cambia "1" por el ID del usuario deseado
         const user = await response.json();
         setNick(user.nick); // Almacena el nick del usuario
         setProfilePicture(user.profile_picture); // Almacena la foto de perfil del usuario
@@ -30,7 +30,7 @@ export function HomeScreen() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("http://192.168.1.147:8080/proyecto01/publicaciones");
+        const response = await fetch("http://172.26.1.252:8080/proyecto01/publicaciones");
         const result = await response.json();
         setPosts(result);
       } catch (error) {
@@ -47,7 +47,7 @@ export function HomeScreen() {
   // Función para agregar un like
   const handleLike = async (postId) => {
     try {
-      const response = await fetch(`http://192.168.1.147:8080/proyecto01/put/${postId}`, {
+      const response = await fetch(`http://172.26.1.252:8080/proyecto01/put/${postId}`, {
         method: "PUT",
       });
 
@@ -76,7 +76,7 @@ export function HomeScreen() {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.147:8080/proyecto01/comentarios/put`, {
+      const response = await fetch(`http://172.26.1.252:8080/proyecto01/comentarios/put`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
