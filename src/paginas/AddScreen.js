@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert, Scro
 import * as ImagePicker from "expo-image-picker";
 import { auth } from '../../firebase-config'; // Asegúrate de importar tu módulo de autenticación
 
-const SERVER_URL = "http://172.26.1.252:8080/proyecto01/publicaciones"; // Cambia esto a tu URL del servidor
+const SERVER_URL = "http://192.168.1.147:8080/proyecto01/publicaciones"; // Cambia esto a tu URL del servidor
 
 export function AddScreen({ navigation }) {
   const [photo, setPhoto] = useState(null);
