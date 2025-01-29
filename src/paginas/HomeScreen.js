@@ -30,7 +30,7 @@ export function HomeScreen() {
   const [userLikes, setUserLikes] = useState(new Set());
   const [userComments, setUserComments] = useState({});
   const [newComment, setNewComment] = useState('');
-  const userId = auth.currentUser?.uid; // Asegúrate de que userId se obtiene correctamente
+  const userId = auth.currentUser?.uid;
 
   useEffect(() => {
     const currentUser = auth.currentUser;
@@ -43,7 +43,7 @@ export function HomeScreen() {
 
   const fetchPublicaciones = async () => {
     try {
-      const url = 'http://172.26.1.252:8080/proyecto01/publicaciones';
+      const url = 'http://192.168.1.147:8080/proyecto01/publicaciones';
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Error al obtener publicaciones');
@@ -78,7 +78,7 @@ export function HomeScreen() {
 
       setPublicaciones(updatedPublicaciones);
 
-      const url = `http://172.26.1.252:8080/proyecto01/publicaciones/put/${id}/${userId}`; // Usa userId aquí
+      const url = `http://192.168.1.147:8080/proyecto01/publicaciones/put/${id}/${userId}`;
       const response = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -97,7 +97,7 @@ export function HomeScreen() {
 
   const handleComment = async (id) => {
     try {
-      const url = `http://172.26.1.252:8080/proyecto01/comentarios/put`;
+      const url = `http://192.168.1.147:8080/proyecto01/comentarios/put`;
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,7 +130,6 @@ export function HomeScreen() {
               style={styles.userPhoto}
             />
             <View>
-              <Text style={styles.publishedBy}>Publicado por</Text>
               <Text style={styles.userName}>{userName}</Text>
             </View>
           </View>
@@ -202,15 +201,16 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#23272A',
+    backgroundColor: '#2C2F33', // Cambiado a un color más oscuro
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#23272A',
-    padding: 10,
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
+    paddingTop: 50,
   },
   userInfo: {
     marginLeft: 10,
@@ -220,87 +220,93 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  publishedBy: {
-    color: '#cccccc',
-    fontSize: 12,
-  },
   userName: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: 20, // Aumentado el tamaño de la fuente
     fontWeight: 'bold',
     flexShrink: 1,
   },
   userPhoto: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50, // Aumentado el tamaño de la imagen
+    height: 50,
+    borderRadius: 25,
     marginRight: 10,
     borderWidth: 2,
     borderColor: '#9FC63B',  
   },
   imageContainer: {
-    padding: 10,
+    padding: 15, // Aumentado el padding
   },
   publicacion: {
-    marginBottom: 20,
+    marginBottom: 25, // Aumentado el margen
     backgroundColor: '#23272A',
-    padding: 10,
+    padding: 15, // Aumentado el padding
+    borderRadius: 10, // Añadido borde redondeado
+    shadowColor: '#000', // Añadido sombra
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // Para Android
   },
   image: {
     width: '100%',
-    height: 200,
-    marginBottom: 10,
+    height: 220, // Aumentado el tamaño de la imagen
+    marginBottom: 15,
+    borderRadius: 10, // Añadido borde redondeado
   },
   likeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   likeCount: {
     color: '#ffffff',
     marginLeft: 10,
-    fontSize: 14,
+    fontSize: 16, // Aumentado el tamaño de la fuente
   },
   title: {
     color: '#9FC63B',
-    fontSize: 18,
+    fontSize: 20, // Aumentado el tamaño de la fuente
     fontWeight: 'bold',
     marginBottom: 5,
   },
   description: {
     color: '#cccccc',
-    fontSize: 14,
+    fontSize: 16, // Aumentado el tamaño de la fuente
     marginBottom: 5,
   },
   date: {
     color: '#888888',
-    fontSize: 12,
+    fontSize: 14,
     fontStyle: 'italic',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#23272A',
+    backgroundColor: '#2C2F33',
   },
   noPublicaciones: {
-    color: '#23272A',
+    color: '#ffffff',
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 18, // Aumentado el tamaño de la fuente
     marginTop: 20,
   },
   commentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 15,
   },
   commentInput: {
     flex: 1,
     backgroundColor: '#333',
     color: '#fff',
     borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     marginRight: 10,
   },
   commentsList: {
@@ -308,7 +314,8 @@ const styles = StyleSheet.create({
   },
   comment: {
     color: '#cccccc',
-    fontSize: 14,
+    fontSize: 15, // Aumentado el tamaño de la fuente
     marginBottom: 5,
   },
 });
+

@@ -36,7 +36,7 @@ export function RegisterScreen({ navigation }) {
 
         // Enviar los datos a la API
         try {
-          await axios.post('http://172.26.1.252:8080/proyecto01/users', usuarioData);
+          await axios.post('http://192.168.1.147:8080/proyecto01/users', usuarioData);
           console.log('Usuario registrado en la API');
           navigation.navigate('LoginScreen');
         } catch (error) {
